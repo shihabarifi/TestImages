@@ -1,0 +1,86 @@
+﻿@model IEnumerable<TestImages.Models.Images>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Descrption)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImageUrl)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+             <td>
+                @Html.DisplayFor(modelItem => item.Descrption)
+            </td>
+            
+           <td>
+     @*   pdf هنا يتم اخذ امتداد الملف لمعرفة انه صورة او *@
+    @{
+
+        string text = item.ImageUrl;
+        int dotIndex = text.IndexOf('.');
+        string extractedText = dotIndex >= 0 && dotIndex < text.Length - 1 ? text.Substring(dotIndex + 1) : string.Empty;
+    }
+      @*  ياخذ الصورة الافتراضية لايقونة البي دي اف pdf هنا فحص  الامتداد اذا كان  *@
+    @if (extractedText == "pdf")
+    {
+        <a href="~/Images/@item.ImageUrl" download>
+            <img src="~/Images/pdf.png" style="width:50px; height:50px" alt="PDF Image" />
+        </a>
+    }
+    else if (IsImageFile(extractedText))
+    {
+        <a href="~/Images/@item.ImageUrl" download>
+            <img src="~/Images/@item.ImageUrl" style="width:50px; height:50px" alt="Image" />
+        </a>
+    }
+    else
+    {
+        <p>الملف غير معروف</p>
+    }
+
+</td>
+            <td>
+                </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+
+@functions {
+    public bool IsImageFile(string fileExtension)
+    {
+        string[] imageExtensions = { "jpg", "jpeg", "png", "gif" };
+        return imageExtensions.Contains(fileExtension.ToLower());
+    }
+}
+

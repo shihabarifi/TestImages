@@ -25,9 +25,12 @@
             </div>
      
              <div class="form-group">
+                   <div class="form-group">
+                        <span class="text-danger invisible" id="ImageError">Please choose image</span>
+                    </div>
                             <label asp-for="ImageUrl" class="control-lable"></label>
-                            <input type="file" class="form-control" asp-for="ImageUrl" id="userImage" />
-                            
+                            <input type="file" class="form-control" asp-for="ImageUrl" id="userImage" onchange="handleFile()"/>
+                             <span asp-validation-for="ImageUrl" class="text-danger"></span>
                         </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -39,5 +42,90 @@
 <div>
     <a class="btn btn-info" asp-action="Index">Back to List</a>
 </div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} 
 
+
+  @*  للتحقق من حجم الصورة مع الامتداد الذي تشتي تحددة*@
+    <script>
+        
+    function handleFile() {
+      $("#ImageError").addClass("invisible").removeClass("visible");
+
+     var inputElement = document.getElementById("userImage");
+    var file = inputElement.files[0]; // الحصول على الملف المحدد
+    var fileSize = file.size;
+    var fileName = inputElement.value.split("\\").pop(); // تصحيح طريقة الحصول على اسم الملف
+    var fileExt = fileName.split(".").pop(); // الحصول على امتداد الملف
+
+      var error = IsImageValid(fileSize, fileExt);
+      if (error !== "") {
+        $("#ImageError").text(error).removeClass("invisible").addClass("visible");
+         inputElement.value = ""; // إعادة تعيين قيمة الملف المحدد
+        return;
+      }
+
+      // استمر في المعالجة الأخرى للصورة
+    }
+
+    //دالة التحقق من الحجم مع الامتداد 
+    function IsImageValid(fileSize, fileExt) {
+      var error = "";
+      error = IsExtensionValid(fileExt);
+
+      if (error !== "") {
+        return error;
+      }
+
+      error = IsFileSizeValid(fileSize);
+      if (error !== "") {
+        return error;
+      }
+
+      return "";
+    }
+
+    //دالة التحقق من الامتداد المطلوب يمكنك الاضافة امتدادات اخرى 
+    function IsExtensionValid(fileExt) {
+      var allowedExtensions = ["jpg", "png","pdf"];
+      if (!allowedExtensions.includes(fileExt)) {
+          //الرسالة في حالة الخطأ
+        return "Only Jpeg or Png or pdf files are Accepted";
+      }
+
+      return "";
+    }
+
+    //دالة التحقق من حجم الملف 
+    function IsFileSizeValid(fileSize) {
+      var maxSizeInBytes = 100 * 1024; // 100 KB
+      var fileSizeInBytes = Math.round(fileSize);
+
+      if (fileSizeInBytes > maxSizeInBytes) {
+          //رسالة خطأ في الحجم
+        return "Files Sized over 100 KB are not Allowed";
+      }
+
+      return "";
+    }
+
+    function IsImageSelected() {
+      if ($("#userImage").val() === "Error") {
+        return "Image Not Selected To Upload";
+      }
+
+      return "";
+    }
+
+    function ValidateForm() {
+      var error = IsImageSelected();
+      if (error !== "") {
+        $("#ImageError").text(error).removeClass("invisible").addClass("visible");
+        return false;
+      }
+
+      return true;
+    }
+    </script>
+}
 
